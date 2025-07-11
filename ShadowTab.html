@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#00ffff"/>
+  <title>ShadowTab Tarayıcı</title>
+  <link rel="manifest" href="data:application/manifest+json,{...}">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #1e1e1e;
+      color: white;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    #intro {
+      background: black;
+      color: cyan;
+      text-align: center;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      animation: fadeIn 1s;
+    }
+
+    .zoom {
+      font-size: 40px;
+      animation: zoomIn 2s ease-out;
+    }
+
+    .loading {
+      animation: blink 1s infinite;
+    }
+
+    @keyframes zoomIn {
+      0% { transform: scale(0.1); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    #navbar {
+      background-color: #121212;
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      border-bottom: 2px solid #00ffff;
+    }
+
+    button {
+      background: #00ffff;
+      color: black;
+      font-weight: bold;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 14px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+
+    .page { display: none; padding: 20px; }
+    .active { display: block; }
+
+    .light-mode {
+      background-color: #f1f1f1;
+      color: #111;
+    }
+
+    #version {
+      text-align: right;
+      font-size: 14px;
+      padding: 0 15px;
+      color: #ccc;
+    }
+
+    #slogan {
+      padding: 0 20px;
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    #navbar h1 {
+      color: white;
+      transition: color 0.3s;
+    }
+
+    #others {
+      padding: 20px;
+    }
+
+    #calendar {
+      padding: 10px;
+    }
+
+    /* İndirilenler Bölümü */
+    #downloadList {
+      padding: 20px;
+      font-size: 16px;
+      background: #222;
+      border-radius: 10px;
+      color: white;
+    }
+    #downloadList div {
+      margin: 10px 0;
+      padding: 10px;
+      border-bottom: 1px solid #00ffff;
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="intro">
+  <h1 class="zoom">🌐 ShadowTab</h1>
+  <p class="loading">Yükleniyor...</p>
+</div>
+
+<div id="app" style="display:none;">
+  <div id="navbar">
+    <h1 id="title">🌐 ShadowTab</h1>
+    <div>
+      <button onclick="showPage('browser')">Tarayıcı</button>
+      <button onclick="showPage('downloads')">İndirilenler</button>
+      <button onclick="toggleTheme()">🌗</button>
+      <button onclick="showPage('others')">Diğer</button>
+    </div>
+  </div>
+
+  <div id="version">Version 1.0</div>
+  <div id="slogan">
+    <p><strong>ShadowTab -</strong> Hız, Güvenlik ve Yüksek Performansın Birleşimi</p>
+    <p><strong>Açılım:</strong> Speed, High performance, Advanced security, Data protection, Optimization, Web Navigation, Trusted, Accessibility, Browser</p>
+  </div>
+
+  <div id="browser" class="page active">
+    <input type="text" id="urlInput" placeholder="https://www.google.com">
+    <button onclick="loadURL()">Git</button>
+    <iframe id="browserFrame"></iframe>
+  </div>
+
+  <div id="downloads" class="page">
+    <h2>📥 İndirilenler</h2>
+    <div id="downloadList">
+      <div><b>setup.exe</b> - 32 MB <button onclick="this.parentElement.remove()">❌</button></div>
+      <div><b>ShadowTab,STab,WTab.zips</b> - 120 MB <button onclick="this.parentElement.remove()">❌</button></div>
+      <div><b>video.mp4</b> - 250 MB <button onclick="this.parentElement.remove()">❌</button></div>
+    </div>
+  </div>
+
+  <!-- Diğer Bölümü (Takvim, Sponsorlar ve Hava Durumu) -->
+  <div id="others" class="page">
+    <h2>📆 Diğer</h2>
+    <button onclick="showCalendar()">Takvim</button>
+    <button onclick="showSponsors()">Sponsorlar</button>
+    <button onclick="showWeather()">Hava Durumu</button>
+
+    <!-- Takvim bölümü -->
+    <div id="calendar" style="display:none;">
+      <input type="date" id="datePicker" />
+    </div>
+
+    <!-- Sponsorlar Bölümü -->
+    <div id="sponsors" style="display:none;">
+      <h3>SPONSORLAR</h3>
+      <ul>
+        <li>FE</li>
+        <li>MUZ FC</li>
+        <li>BARIL ETKİNLİĞİ</li>
+        <li>FE SPONSORLUK KONSEYİ</li>
+      </ul>
+    </div>
+
+    <!-- Hava Durumu Bölümü -->
+    <div id="weather" style="display:none;">
+      <h3>Simülasyonlu Hava Durumu</h3>
+      <p>Bugün hava açık ve sıcak.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.onload = () => {
+    setTimeout(() => {
+      document.getElementById("intro").style.display = "none";
+      document.getElementById("app").style.display = "block";
+    }, 3000);
+  };
+
+  // Sayfa geçişi
+  function showPage(pageId) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById(pageId).classList.add("active");
+  }
+
+  // Tema değiştirme
+  function toggleTheme() {
+    document.body.classList.toggle("light-mode");
+
+    // "ShadowTab" yazısının rengini değiştir
+    const title = document.getElementById("title");
+    if (document.body.classList.contains("light-mode")) {
+      title.style.color = "black"; // Siyah tema
+    } else {
+      title.style.color = "white"; // Koyu tema
+    }
+  }
+
+  // "Git" butonu
+  function loadURL() {
+    let input = document.getElementById("urlInput").value;
+    if (!input.startsWith("http")) {
+      input = "https://www.google.com/search?q=" + encodeURIComponent(input);
+    }
+    document.getElementById("browserFrame").src = input;
+  }
+
+  // Takvim
+  function showCalendar() {
+    document.getElementById("calendar").style.display = "block";
+    document.getElementById("sponsors").style.display = "none";
+    document.getElementById("weather").style.display = "none";
+  }
+
+  // Sponsorlar
+  function showSponsors() {
+    document.getElementById("sponsors").style.display = "block";
+    document.getElementById("calendar").style.display = "none";
+    document.getElementById("weather").style.display = "none";
+  }
+
+  // Hava Durumu
+  function showWeather() {
+    document.getElementById("weather").style.display = "block";
+    document.getElementById("calendar").style.display = "none";
+    document.getElementById("sponsors").style.display = "none";
+  }
+</script>
+
+</body>
+</html>
